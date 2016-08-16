@@ -20,7 +20,13 @@
     </style>
   </head>
   <body>
-    
+
+  <div>
+    <label>Eligable courses (csv):</label>
+    <input type="text" name="csv_courses">
+    <input type="submit" onclick="eval_eleg_courses()" >
+  </div>
+
     <ul id="courses" style="list-style: none outside none;">
         <li>
           <div class="title">Course title</div>
@@ -32,27 +38,54 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-      var eleg_courses=["CSE111"]
-
-
       var socket = io();
 
-      eleg_courses.forEach(function(course){
+      var eleg_courses=["CSE111"]
 
-          var c = $('<li>').attr('id',course);
-          c.append($('<div class="title">').text(course));
-          c.append($('<div class="free">').text(0));
-          $('#courses').append(c);
+      var eval_eleg_courses = function(){
+        $('#courses').empty();
 
+        
+        eleg_courses =  $( "input[name='csv_courses']" ).val().trim().split(",")
           
 
 
-          socket.on('course '+course, function(seat){
-            alert(seat)
-            $('#'+course+' >.free').text(seat);
-          });
+        eleg_courses.forEach(function(course){
 
-      })
+
+            var c = $('<li>').attr('id',course);
+            c.append($('<div class="title">').text(course));
+            c.append($('<div class="free">').text(0));
+            $('#courses').append(c);
+
+            
+
+            track_course(course);
+
+            socket.on('course '+course, function(seat){
+              alert(seat)
+              $('#'+course+' >.free').text(seat);
+            });
+
+
+
+
+        })
+
+      }
+      
+
+
+      var track_course = function(course){
+        $.post( "/courses/follow", { course: course })
+          .done(function( data ) {
+            alert( "Data Loaded: " + data );
+          });
+      }
+
+
+
+
 
     </script>
   </body>
